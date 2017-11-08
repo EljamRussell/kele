@@ -1,9 +1,11 @@
 require 'httparty'
+require 'json'
 
 class Kele
   include HTTParty
 
   attr_reader :me
+  attr_reader :mentor_availability
 
   def initialize(email, password)
     response = self.class.post(api_url("/sessions"), body: { "email": email, "password": password })
@@ -16,7 +18,12 @@ class Kele
     response = self.class.get(api_url('/users/me'), headers: { "authorization" => @auth_token })
     @me = JSON.parse(response.body)
   end
-  
+
+  def get_mentor_availability(mentor_id)
+    response = self.class.get(api_url("/mentors/#{mentor_id}/student_availability"), headers: { "authorization" => @auth_token })
+    @mentor_availability = JSON.parse(response.body)
+  end
+
   private
 
   def api_url(endpoint)
