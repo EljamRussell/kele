@@ -25,30 +25,46 @@ class Kele
     @mentor_availability = JSON.parse(response.body)
   end
 
-  def get_messages(page_num=nil)
-    if page_num == nil
+  def get_messages(page)
+    if page == nil
       response = self.class.get(api_url("/message_threads"), headers: { "authorization" => @auth_token })
     else
-      response = self.class.get(api_url("/message_threads?page=#{page_num}"), headers: { "authorization" => @auth_token })
+      response = self.class.get(api_url("/message_threads?page=#{page}"), headers: { "authorization" => @auth_token })
     end
-    @messages = JSON.parse(response.body)
+    @get_messages = JSON.parse(response.body)
   end
 
-  def create_message(sender, recipient_id, token, subject, stripped_text)
-    response = self.class.post(api_url("/messages"), body: {
-        "sender": sender,
-        "recipient_id": recipient_id,
-        "token": token,
-        "subject": subject,
-        "stripped_text": stripped_text
-        },
-        headers: {"authorization" => @auth_token})
-    #puts response
+  def create_message(sender, recipient_id, stripped_text, subject=nil, token=nil)
+    body = {
+      "sender": sender,
+      "recipient_id": recipient_id,
+      "stripped-text": stripped_text}
+    body.merge!({"token": token}) unless token.nil?
+    body.merge!({"subject": subject}) unless subject.nil?
+    puts body.inspect
+    response = self.class.post(api_url("/messages"),
+      body: body,
+      headers: {"authorization" => @auth_token}
+    )
+    puts response.inspect
   end
 
-  private
+    def create_submission(checkpoint_id, enrollment_id, comment, assignment_branch=nil, assignment_commit_link=nil)
+      body = {
+        "checkpoint_id": checkpoint_id,
+        "comment": comment,
+        "enrollment_id": enrollment_id
+      }
+      body.merge!({"assignment_branch": assignment_branch}) unless assignment_branch.nil?
+      body.merge!({"assignment_commit_link": assignment_commit_link}) unless assignment_commit_link.nil?
+      response = self.class.post(api_url("/checkpoint_submissions"),
+        body: body,
+        headers: {"authorization" => @auth_token}
+      )
+      puts response.inspect
+    end
 
-  def api_url(endpoint)
-    "https://www.bloc.io/api/v1#{endpoint}"
-  end
-end
+        def api_url(endpoint)
+          "https://www.bloc.io/api/v1#{endpoint}"
+        end
+      end
