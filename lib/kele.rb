@@ -64,6 +64,24 @@ class Kele
       puts response.inspect
     end
 
+    def update_submission(submission_id, checkpoint_id, enrollment_id, comment, assignment_branch=nil, assignment_commit_link=nil)
+        body = {
+          "submission_id": submission_id,
+          "checkpoint_id": checkpoint_id,
+          "enrollment_id": enrollment_id,
+          "comment": comment
+        }
+        body.merge!({"assignment_branch": assignment_branch}) unless assignment_branch.nil?
+        body.merge!({"assignment_commit_link": assignment_commit_link}) unless assignment_commit_link.nil?
+        response = self.class.post(api_url("/checkpoint_submissions"),
+          body: body,
+          headers: {"authorization" => @auth_token}
+        )
+          puts response.inspect
+        end
+# 244187
+        private
+
         def api_url(endpoint)
           "https://www.bloc.io/api/v1#{endpoint}"
         end
